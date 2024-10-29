@@ -11,6 +11,8 @@ services:
   server:
     build:
       context: .
+    container_name: python-docker
+    image: python-docker:tag
     ports:
       - 8000:8000
 
