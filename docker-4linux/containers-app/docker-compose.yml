@@ -1,0 +1,46 @@
+services:
+  mariadb:
+    image: "mariadb:${MARIADB_VERSION}"  # Imagem do MariaDB
+    container_name: mariadb
+    restart: 'always'
+    environment:
+      MYSQL_ROOT_PASSWORD: "${SENHA_ROOT_MYSQL}"  # Senha do root do MySQL
+      MYSQL_DATABASE: "${BANCO_DE_DADOS_MYSQL}"  # Banco de dados a ser criado
+      MYSQL_USER: "${MYSQL_USER}"  # Usuário MySQL
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"  # Senha do usuário MySQL
+    volumes:
+      - vol_mariadb:/var/lib/mysql:rw
+      # - "/var/lib/mysql/data:/var/lib/mysql"  # Diretório de dados
+      # - "/var/lib/mysql/logs:/var/lib/mysql/logs"  # Logs do MySQL
+      # - /var/docker/mariadb/conf:/etc/mysql  # Arquivos de configuração personalizados
+    ports:
+      - "3306:3306"  # Porta do MariaDB
+    networks:
+      - mynetwork  # Rede personalizada (se necessário)
+
+  flask:
+    image: flask
+    container_name: flask
+    environment:
+      DB_HOST: mariadb  # Nome do serviço MariaDB
+      DB_USER: container  # Nome do usuário MariaDB
+      DB_PASS: 4linux  # Senha do usuário
+      DB_NAME: container  # Nome do banco de dados
+      # DB_HOST: "mariadb"  # Nome do serviço MariaDB
+      # DB_USER: "${MYSQL_USER}"
+      # DB_PASS: "${MYSQL_PASSWORD}"
+      # DB_NAME: "${BANCO_DE_DADOS_MYSQL}"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mariadb
+    #entrypoint: ["./wait-for-it.sh", "flask run"]  # Chama o script de espera antes de iniciar o Flask
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge  # Ou pode usar a rede padrão, se não precisar de rede personalizada
+
+volumes:
+  vol_mariadb:
